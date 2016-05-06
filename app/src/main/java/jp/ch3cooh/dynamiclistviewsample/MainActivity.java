@@ -23,7 +23,7 @@ import java.util.Locale;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
-public class MainActivity extends AppCompatActivity implements OnItemMovedListener, OnDismissCallback {
+public class MainActivity extends AppCompatActivity {
 
     @InjectView(R.id.listView)
     DynamicListView listView;
@@ -38,7 +38,13 @@ public class MainActivity extends AppCompatActivity implements OnItemMovedListen
 
         /* Setup the adapter */
         listAdapter = new ListAdapter(this);
-        SimpleSwipeUndoAdapter simpleSwipeUndoAdapter = new SimpleSwipeUndoAdapter(listAdapter, this, this);
+        SimpleSwipeUndoAdapter simpleSwipeUndoAdapter = new SimpleSwipeUndoAdapter(listAdapter,
+                this, new OnDismissCallback() {
+            @Override
+            public void onDismiss(@NonNull ViewGroup listView, @NonNull int[] reverseSortedPositions) {
+
+            }
+        });
         AlphaInAnimationAdapter animAdapter = new AlphaInAnimationAdapter(simpleSwipeUndoAdapter);
         animAdapter.setAbsListView(listView);
         assert animAdapter.getViewAnimator() != null;
@@ -48,7 +54,12 @@ public class MainActivity extends AppCompatActivity implements OnItemMovedListen
         /* Enable drag and drop functionality */
         listView.enableDragAndDrop();
         listView.setDraggableManager(new TouchViewDraggableManager(R.id.list_row_draganddrop_touchview));
-        listView.setOnItemMovedListener(this);
+        listView.setOnItemMovedListener(new OnItemMovedListener() {
+            @Override
+            public void onItemMoved(int originalPosition, int newPosition) {
+                // リストの並び替え後に実行される
+            }
+        });
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -60,17 +71,6 @@ public class MainActivity extends AppCompatActivity implements OnItemMovedListen
             }
         });
     }
-
-    @Override
-    public void onDismiss(@NonNull ViewGroup listView, @NonNull int[] reverseSortedPositions) {
-
-    }
-
-    @Override
-    public void onItemMoved(int originalPosition, int newPosition) {
-        // リストの並び替えをおこなう
-    }
-
 
     private class ListAdapter extends ArrayAdapter<String> implements UndoAdapter {
 
